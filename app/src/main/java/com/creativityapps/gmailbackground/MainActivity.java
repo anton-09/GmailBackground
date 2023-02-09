@@ -1,20 +1,16 @@
 package com.creativityapps.gmailbackground;
 
-import android.Manifest;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.creativityapps.gmailbackgroundlibrary.BackgroundMail;
 
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.RuntimePermissions;
 
-@RuntimePermissions
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -24,49 +20,15 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        findViewById(R.id.bt_send_text).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivityPermissionsDispatcher.sendTextEmailWithPermissionCheck(MainActivity.this);
-            }
-        });
-        findViewById(R.id.bt_send_html).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivityPermissionsDispatcher.sendHtmlEmailWithPermissionCheck(MainActivity.this);
-            }
-        });
-        findViewById(R.id.bt_send_attachment).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivityPermissionsDispatcher.sendAttachedEmailWithPermissionCheck(MainActivity.this);
-            }
+        findViewById(R.id.bt_send_text).setOnClickListener(view -> sendEmail(BackgroundMail.TYPE_PLAIN, null));
+        findViewById(R.id.bt_send_html).setOnClickListener(view -> sendEmail(BackgroundMail.TYPE_HTML, null));
+        findViewById(R.id.bt_send_attachment).setOnClickListener(view ->
+        {
+            String fileName = Environment.getExternalStorageDirectory().getPath() + "/Test.txt";
+            sendEmail(BackgroundMail.TYPE_PLAIN, fileName);
         });
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        MainActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
-    }
-
-    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void sendTextEmail() {
-        sendEmail(BackgroundMail.TYPE_PLAIN, null);
-    }
-
-    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void sendHtmlEmail() {
-        sendEmail(BackgroundMail.TYPE_HTML, null);
-    }
-
-    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void sendAttachedEmail() {
-        // create a `Test.txt` and locate it on device sdcard and run the example
-        String fileName = Environment.getExternalStorageDirectory().getPath() + "/Test.txt";
-
-        sendEmail(BackgroundMail.TYPE_PLAIN, fileName);
-    }
 
     private void sendEmail(String type, String fileName) {
         BackgroundMail.Builder builder = BackgroundMail.newBuilder(this)
